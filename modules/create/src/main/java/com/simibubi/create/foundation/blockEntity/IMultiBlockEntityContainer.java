@@ -8,8 +8,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import javax.annotation.Nullable;
 
-import io.github.fabricators_of_create.porting_lib_ufo.fluids.FluidStack;
-import io.github.fabricators_of_create.porting_lib_ufo.transfer.fluid.FluidTank;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.transfer.fluid.FluidTank;
 
 public interface IMultiBlockEntityContainer {
 

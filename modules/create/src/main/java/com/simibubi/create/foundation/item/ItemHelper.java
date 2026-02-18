@@ -11,8 +11,8 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.simibubi.create.foundation.utility.Pair;
 
-import io.github.fabricators_of_create.porting_lib_ufo.transfer.TransferUtil;
-import io.github.fabricators_of_create.porting_lib_ufo.transfer.item.ItemHandlerHelper;
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
@@ -77,7 +77,7 @@ public class ItemHelper {
 		return newone;
 	}
 
-	public static void fillItemStackHandler(ItemContainerContents contents, io.github.fabricators_of_create.porting_lib_ufo.transfer.item.ItemStackHandler inv) {
+	public static void fillItemStackHandler(ItemContainerContents contents, io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler inv) {
 		List<ItemStack> itemStacks = contents.stream().toList();
 		int limit = Math.min(itemStacks.size(), inv.getSlotCount());
 		for (int i = 0; i < limit; i++) {
@@ -85,7 +85,7 @@ public class ItemHelper {
 		}
 	}
 
-	public static ItemContainerContents containerContentsFromHandler(io.github.fabricators_of_create.porting_lib_ufo.transfer.item.ItemStackHandler handler) {
+	public static ItemContainerContents containerContentsFromHandler(io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler handler) {
 		NonNullList<ItemStack> stacks = NonNullList.withSize(handler.getSlotCount(), ItemStack.EMPTY);
 		for (int i = 0; i < handler.getSlotCount(); i++) {
 			stacks.set(i, handler.getStackInSlot(i));

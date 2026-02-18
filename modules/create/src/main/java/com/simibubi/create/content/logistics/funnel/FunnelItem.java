@@ -14,7 +14,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 import org.apache.logging.log4j.core.Filter.Result;
 
-import io.github.fabricators_of_create.porting_lib_ufo.item.BlockUseBypassingItem;
+import io.github.fabricators_of_create.porting_lib.item.BlockUseBypassingItem;
 
 public class FunnelItem extends BlockItem implements BlockUseBypassingItem {
 

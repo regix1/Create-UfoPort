@@ -5,8 +5,8 @@ import com.simibubi.create.Create;
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateItemModelProvider;
 
-import io.github.fabricators_of_create.porting_lib_ufo.models.generators.ModelFile.UncheckedModelFile;
-import io.github.fabricators_of_create.porting_lib_ufo.models.generators.item.ItemModelBuilder;
+import io.github.fabricators_of_create.porting_lib.models.generators.ModelFile.UncheckedModelFile;
+import io.github.fabricators_of_create.porting_lib.models.generators.item.ItemModelBuilder;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;

@@ -26,7 +26,7 @@ import com.tterrag.registrate.AbstractRegistrate;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import com.tterrag.registrate.util.nullness.NonnullType;
 
-import io.github.fabricators_of_create.porting_lib_ufo.data.LanguageProvider;
+import io.github.fabricators_of_create.porting_lib.data.LanguageProvider;
 import net.minecraft.core.Registry;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.network.chat.contents.TranslatableContents;

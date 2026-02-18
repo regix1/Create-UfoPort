@@ -6,9 +6,9 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 
 import javax.annotation.Nullable;
 
-import io.github.fabricators_of_create.porting_lib_ufo.fluids.FluidStack;
-import io.github.fabricators_of_create.porting_lib_ufo.transfer.callbacks.TransactionCallback;
-import io.github.fabricators_of_create.porting_lib_ufo.transfer.fluid.FluidTank;
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import io.github.fabricators_of_create.porting_lib.transfer.callbacks.TransactionCallback;
+import io.github.fabricators_of_create.porting_lib.transfer.fluid.FluidTank;
 
 public class SmartFluidTank extends FluidTank {
 

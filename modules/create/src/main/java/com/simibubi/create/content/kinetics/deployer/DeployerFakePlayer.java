@@ -16,8 +16,8 @@ import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.config.CKinetics;
 
-import io.github.fabricators_of_create.porting_lib_ufo.entity.events.EntityEvents;
-import io.github.fabricators_of_create.porting_lib_ufo.util.UsernameCache;
+import io.github.fabricators_of_create.porting_lib.entity.events.EntityEvents;
+import io.github.fabricators_of_create.porting_lib.util.UsernameCache;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
