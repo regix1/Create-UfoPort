@@ -1,6 +1,5 @@
 package com.simibubi.create.content.fluids.potion;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -15,8 +14,6 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.component.PatchedDataComponentMap;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -58,9 +55,10 @@ public class PotionFluid extends VirtualFluid {
 			return fs;
 		
 		PotionContents potions = fs.getOrCreateComponent(DataComponents.POTION_CONTENTS, 
-				new PotionContents(Optional.empty(), Optional.empty(), new ArrayList()));
+				new PotionContents(Optional.empty(), Optional.empty(), List.of()));
 		for (MobEffectInstance effectinstance : customEffects)
-			potions.withEffectAdded(effectinstance);
+			potions = potions.withEffectAdded(effectinstance);
+		fs.set(DataComponents.POTION_CONTENTS, potions);
 		return new FluidStack(fs.getFluid(), fs.getAmount(), (PatchedDataComponentMap)fs.getComponents());
 	}
 

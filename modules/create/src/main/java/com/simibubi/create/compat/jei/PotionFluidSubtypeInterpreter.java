@@ -30,13 +30,12 @@ public class PotionFluidSubtypeInterpreter implements IIngredientSubtypeInterpre
 		String potionTypeString = Potion.getName(Optional.ofNullable(potionType), "");
 		BottleType bottleType = ingredient.getFluidVariant().getComponents().get(AllDataComponents.BOTTLE_TYPE).isEmpty()
 				? BottleType.REGULAR : ingredient.getFluidVariant().getComponents().get(AllDataComponents.BOTTLE_TYPE).get();
-		String bottleTypeString = bottleType.toString();
 
 		StringBuilder stringBuilder = new StringBuilder(potionTypeString);
 		List<MobEffectInstance> effects = cont.customEffects();
 
 		stringBuilder.append(";")
-				.append(bottleTypeString);
+				.append(bottleType);
 		for (MobEffectInstance effect : potionType.value().getEffects())
 			stringBuilder.append(";")
 					.append(effect);
