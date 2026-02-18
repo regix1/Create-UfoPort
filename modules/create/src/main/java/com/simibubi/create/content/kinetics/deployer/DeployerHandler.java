@@ -356,8 +356,7 @@ public class DeployerHandler {
 		}
 
 		if (stack.getItem() instanceof SandPaperItem && stack.has(AllDataComponents.POLISHING)) {
-			player.spawnedItemEffects = ItemStack.parseOptional(Create.getRegistryAccess(), 
-					stack.get(AllDataComponents.POLISHING).getCompound("Polishing"));
+			player.spawnedItemEffects = stack.get(AllDataComponents.POLISHING).item();
 			AllSoundEvents.SANDING_SHORT.playOnServer(world, pos, .25f, 1f);
 		}
 
