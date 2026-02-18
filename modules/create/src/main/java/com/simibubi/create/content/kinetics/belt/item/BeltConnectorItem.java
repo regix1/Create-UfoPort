@@ -15,7 +15,6 @@ import com.simibubi.create.content.kinetics.simpleRelays.AbstractSimpleShaftBloc
 import com.simibubi.create.content.kinetics.simpleRelays.ShaftBlock;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
-import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.utility.VecHelper;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
@@ -51,7 +50,7 @@ public class BeltConnectorItem extends BlockItem {
 	public InteractionResult useOn(UseOnContext context) {
 		Player playerEntity = context.getPlayer();
 		if (playerEntity != null && playerEntity.isShiftKeyDown()) {
-			ItemHelper.clearComponents(context.getItemInHand());
+			context.getItemInHand().remove(AllDataComponents.FIRST_PULLEY);
 			return InteractionResult.SUCCESS;
 		}
 
@@ -90,7 +89,7 @@ public class BeltConnectorItem extends BlockItem {
 
 			if (!context.getItemInHand()
 					.isEmpty()) {
-				ItemHelper.clearComponents(context.getItemInHand());
+				context.getItemInHand().remove(AllDataComponents.FIRST_PULLEY);
 				playerEntity.getCooldowns()
 						.addCooldown(this, 5);
 			}
