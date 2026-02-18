@@ -2,9 +2,9 @@ dependencies {
     
 }
 
-portingLib.addModuleDependency("flywheel")
-portingLib.addModuleDependency("milk")
-portingLib.addModuleDependency("porting_lib_ufo")
-portingLib.addModuleDependency("registrate_fabric")
+ufoport.addModuleDependency("flywheel")
+ufoport.addModuleDependency("milk")
+ufoport.addModuleDependency("porting_lib")
+ufoport.addModuleDependency("registrate_fabric")
 
-portingLib.enableDatagen()
+ufoport.enableDatagen()

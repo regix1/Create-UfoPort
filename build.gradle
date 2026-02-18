@@ -1,5 +1,5 @@
-import io.github.fabricators_of_create.porting_lib_build.tasks.FmjExpander
-import io.github.fabricators_of_create.porting_lib_build.PortingLibBuildPlugin
+import com.simibubi_port.create.build.tasks.FmjExpander
+import com.simibubi_port.create.build.UfoPortBuildPlugin
 
 plugins {
     id "fabric-loom"
@@ -21,36 +21,8 @@ String runNumber = "37483"
 String build = runNumber != null ? "build.$runNumber" : "local"
 version = "$mod_version+mc$displayed_mc_versions"
 
-repositories {
-    maven { url = "https://maven.quiltmc.org/repository/release" } // QM
-    maven { url = "https://maven.parchmentmc.org" } // Parchment
-    maven { url = "https://maven.fabricmc.net/" } // FAPI, Loader
-    maven { url = "https://mvn.devos.one/snapshots/" } // Registrate, Forge Tags, Milk Lib
-    maven { url = "https://mvn.devos.one/releases/" } // Porting Lib
-    maven { // for Porting Lib: Mixin Extras, Fabric ASM
-        url = "https://jitpack.io/"
-        content { includeGroupAndSubgroups("com.github") }
-    }
-    maven { url = "https://maven.dblsaiko.net/" }
-    maven { url = "https://maven.vram.io/" }
-    maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" } // Forge Config API Port
-    maven { url = "https://maven.tterrag.com/" } // Flywheel
-    maven { url = "https://maven.shedaniel.me/" } // REI and deps
-    maven { url = "https://api.modrinth.com/maven" } // LazyDFU, Sodium, Sandwichable
-    maven { url = "https://maven.terraformersmc.com/" } // Mod Menu, Trinkets
-    maven { url = "https://squiddev.cc/maven" } // CC:T
-    maven { url = "https://modmaven.dev" } // Botania
-    maven { // Reach Entity Attributes
-        url = "https://maven.jamieswhiteshirt.com/libs-release"
-        content { includeGroup("com.jamieswhiteshirt") }
-    }
-    maven { url = "https://maven.ladysnake.org/releases" } // CCA, for Trinkets
-}
-
-
-
 // actual dependencies for Create
-def dependencies(DependencyHandler deps) {
+def createDependencies(DependencyHandler deps) {
         deps.modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
 
 	deps.modApi(deps.include("com.electronwill.night-config:core:$night_config_version"))
@@ -98,9 +70,9 @@ allprojects {
 	if (name == "buildSrc") return
 
 	apply plugin: "fabric-loom"
-	apply plugin: PortingLibBuildPlugin
+	apply plugin: UfoPortBuildPlugin
 
-	group = "io.github.fabricators_of_create.Porting-Lib"
+	group = project.maven_group
 
 	repositories {
     		maven { url = "https://maven.quiltmc.org/repository/release" } // QM
@@ -126,7 +98,7 @@ allprojects {
     		setup(dependencies)
     		devEnv(dependencies)
     		compat(dependencies)
-    		dependencies(dependencies)
+    		createDependencies(dependencies)
 	}
 
 	loom {
