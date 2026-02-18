@@ -6,7 +6,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.simibubi.create.foundation.gui.Theme;
 import com.simibubi.create.foundation.utility.Components;
 
-import io.github.fabricators_of_create.porting_lib.util.KeyBindingHelper;
+import io.github.fabricators_of_create.porting_lib_ufo.util.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;

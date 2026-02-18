@@ -40,7 +40,7 @@ import com.simibubi.create.infrastructure.worldgen.AllFeatures;
 import com.simibubi.create.infrastructure.worldgen.AllPlacementModifiers;
 import com.tterrag.registrate.util.entry.RegistryEntry;
 
-import io.github.fabricators_of_create.porting_lib.mixin.accessors.common.accessor.MinecraftServerAccessor;
+import io.github.fabricators_of_create.porting_lib_ufo.mixin.accessors.common.accessor.MinecraftServerAccessor;
 import io.github.tropheusj.milk.Milk;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;

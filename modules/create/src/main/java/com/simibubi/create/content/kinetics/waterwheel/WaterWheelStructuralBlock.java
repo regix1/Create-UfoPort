@@ -5,9 +5,9 @@ import java.util.Set;
 
 import com.simibubi.create.foundation.utility.AdventureUtil;
 
-import io.github.fabricators_of_create.porting_lib.block.CustomDestroyEffectsBlock;
-import io.github.fabricators_of_create.porting_lib.block.CustomHitEffectsBlock;
-import io.github.fabricators_of_create.porting_lib.block.CustomLandingEffectsBlock;
+import io.github.fabricators_of_create.porting_lib_ufo.block.CustomDestroyEffectsBlock;
+import io.github.fabricators_of_create.porting_lib_ufo.block.CustomHitEffectsBlock;
+import io.github.fabricators_of_create.porting_lib_ufo.block.CustomLandingEffectsBlock;
 
 import org.jetbrains.annotations.Nullable;
 

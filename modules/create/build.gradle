@@ -4,7 +4,7 @@ dependencies {
 
 ufoport.addModuleDependency("flywheel")
 ufoport.addModuleDependency("milk")
-ufoport.addModuleDependency("porting_lib")
+ufoport.addModuleDependency("porting_lib_ufo")
 ufoport.addModuleDependency("registrate_fabric")
 
 ufoport.enableDatagen()
