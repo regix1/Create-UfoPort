@@ -25,6 +25,7 @@
     "common.ChunkMapMixin",
     "common.ChunkStatusMixin",
     "common.ClipContextMixin",
+    "common.ConnectionMixin",
     "common.DeadBushBlockMixin",
     "common.DiodeBlockMixin",
     "common.DropExperienceBlockMixin",
