@@ -96,7 +96,10 @@ public class HarvesterMovementBehaviour implements MovementBehaviour {
 			effectChance = .45f;
 		}
 
-		MutableBoolean seedSubtracted = new MutableBoolean(notCropButCuttable);
+		BlockState cutCrop = cutCrop(world, pos, stateVisited);
+		boolean blockResetsInPlace = !cutCrop.isAir() && cutCrop.getBlock() == stateVisited.getBlock();
+
+		MutableBoolean seedSubtracted = new MutableBoolean(notCropButCuttable || blockResetsInPlace);
 		BlockState state = stateVisited;
 		BlockHelper.destroyBlockAs(world, pos, null, item, effectChance, stack -> {
 			if (AllConfigs.server().kinetics.harvesterReplants.get() && !seedSubtracted.getValue()
@@ -108,7 +111,6 @@ public class HarvesterMovementBehaviour implements MovementBehaviour {
 				dropItem(context, stack);
 		});
 
-		BlockState cutCrop = cutCrop(world, pos, stateVisited);
 		world.setBlockAndUpdate(pos, cutCrop.canSurvive(world, pos) ? cutCrop : Blocks.AIR.defaultBlockState());
 	}
 
