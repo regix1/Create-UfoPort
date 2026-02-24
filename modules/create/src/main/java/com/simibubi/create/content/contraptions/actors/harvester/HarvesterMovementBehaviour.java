@@ -25,6 +25,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.GrowingPlantBlock;
@@ -123,7 +124,7 @@ public class HarvesterMovementBehaviour implements MovementBehaviour {
 		}
 
 		if (state.getCollisionShape(world, pos)
-			.isEmpty() || state.getBlock() instanceof CocoaBlock) {
+			.isEmpty() || state.getBlock() instanceof CocoaBlock || state.getBlock() instanceof BonemealableBlock) {
 			for (Property<?> property : state.getProperties()) {
 				if (!(property instanceof IntegerProperty))
 					continue;
@@ -201,7 +202,7 @@ public class HarvesterMovementBehaviour implements MovementBehaviour {
 				.createLegacyBlock();
 		}
 		if (state.getCollisionShape(world, pos)
-			.isEmpty() || block instanceof CocoaBlock) {
+			.isEmpty() || block instanceof CocoaBlock || block instanceof BonemealableBlock) {
 			for (Property<?> property : state.getProperties()) {
 				if (!(property instanceof IntegerProperty))
 					continue;
