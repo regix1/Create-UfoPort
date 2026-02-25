@@ -380,7 +380,7 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 				CobblemonPortraitRenderer.renderPortrait(
 						graphics, slot.speciesName(), portraitState,
 						portraitX, portraitY, PORTRAIT_SIZE,
-						baseScale, partialTicks);
+						baseScale, 0F);
 				graphics.disableScissor();
 			}
 		}
