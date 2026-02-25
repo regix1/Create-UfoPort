@@ -5,6 +5,8 @@ import static com.simibubi.create.foundation.networking.SimplePacketBase.Network
 
 import java.util.function.Function;
 
+import com.simibubi.create.compat.cobblemon.CobblemonSeatPCBoxDataPacket;
+import com.simibubi.create.compat.cobblemon.CobblemonSeatPCBoxRequestPacket;
 import com.simibubi.create.compat.cobblemon.CobblemonSeatPartyDataPacket;
 import com.simibubi.create.compat.cobblemon.CobblemonSeatPokemonPacket;
 import com.simibubi.create.content.contraptions.ContraptionBlockChangedPacket;
@@ -166,6 +168,7 @@ public enum AllPackets {
 	CONTRAPTION_COLLIDER_LOCK_REQUEST(ContraptionColliderLockPacketRequest.class,
 		ContraptionColliderLockPacketRequest::new, PLAY_TO_SERVER),
 	COBBLEMON_SEAT_POKEMON(CobblemonSeatPokemonPacket.class, CobblemonSeatPokemonPacket::new, PLAY_TO_SERVER),
+	COBBLEMON_SEAT_PC_BOX_REQUEST(CobblemonSeatPCBoxRequestPacket.class, CobblemonSeatPCBoxRequestPacket::new, PLAY_TO_SERVER),
 
 	// Server to Client
 	SYMMETRY_EFFECT(SymmetryEffectPacket.class, SymmetryEffectPacket::new, PLAY_TO_CLIENT),
@@ -211,6 +214,7 @@ public enum AllPackets {
 	CONTRAPTION_COLLIDER_LOCK(ContraptionColliderLockPacket.class, ContraptionColliderLockPacket::new, PLAY_TO_CLIENT),
 	SERVER_DEBUG_INFO(ServerDebugInfoPacket.class, ServerDebugInfoPacket::new, PLAY_TO_CLIENT),
 	COBBLEMON_SEAT_PARTY_DATA(CobblemonSeatPartyDataPacket.class, CobblemonSeatPartyDataPacket::new, PLAY_TO_CLIENT),
+	COBBLEMON_SEAT_PC_BOX_DATA(CobblemonSeatPCBoxDataPacket.class, CobblemonSeatPCBoxDataPacket::new, PLAY_TO_CLIENT),
 
 	// fabric: extra packet in place of custom entity data serializer
 	CARRIAGE_DATA_UPDATE(CarriageDataUpdatePacket.class, CarriageDataUpdatePacket::new, PLAY_TO_CLIENT)

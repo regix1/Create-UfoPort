@@ -14,6 +14,7 @@ import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPointTyp
 import com.simibubi.create.content.kinetics.mechanicalArm.AllArmInteractionPointTypes;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -74,6 +75,18 @@ public class CobblemonCompat {
 
 	public static boolean isSeatSpawnedPokemon(Entity entity) {
 		return isPokemonEntity(entity) && entity.getTags().contains(SEAT_SPAWNED_TAG);
+	}
+
+	public static BlockPos findAdjacentPosition(Level world, BlockPos seatPos) {
+		// Try cardinal directions first
+		for (Direction dir : Direction.Plane.HORIZONTAL) {
+			BlockPos adjacent = seatPos.relative(dir);
+			if (world.getBlockState(adjacent).isAir() || !world.getBlockState(adjacent).isSolid()) {
+				return adjacent;
+			}
+		}
+		// Fallback: above the seat
+		return seatPos.above();
 	}
 
 	// --- Blaze Burner Pokemon Capture ---
@@ -146,6 +159,94 @@ public class CobblemonCompat {
 			LOGGER.warn("Failed to check Cobblemon party", e);
 		}
 		return false;
+	}
+
+	public static int getPCBoxCount(ServerPlayer player) {
+		try {
+			Class<?> cobblemonClass = Class.forName("com.cobblemon.mod.common.Cobblemon");
+			Object storage = cobblemonClass.getMethod("getStorage").invoke(cobblemonClass.getField("INSTANCE").get(null));
+			Object pc = storage.getClass().getMethod("getPC", ServerPlayer.class).invoke(storage, player);
+			List<?> boxes = (List<?>) pc.getClass().getMethod("getBoxes").invoke(pc);
+			return boxes.size();
+		} catch (Exception e) {
+			LOGGER.warn("Failed to get PC box count", e);
+			return 0;
+		}
+	}
+
+	public static List<PartySlotData> getPCBoxData(ServerPlayer player, int boxIndex) {
+		List<PartySlotData> result = new ArrayList<>();
+		try {
+			Class<?> cobblemonClass = Class.forName("com.cobblemon.mod.common.Cobblemon");
+			Object storage = cobblemonClass.getMethod("getStorage").invoke(cobblemonClass.getField("INSTANCE").get(null));
+			Object pc = storage.getClass().getMethod("getPC", ServerPlayer.class).invoke(storage, player);
+			List<?> boxes = (List<?>) pc.getClass().getMethod("getBoxes").invoke(pc);
+			if (boxIndex < 0 || boxIndex >= boxes.size()) return result;
+			Object box = boxes.get(boxIndex);
+			for (int i = 0; i < 30; i++) {
+				Object pokemon = box.getClass().getMethod("get", int.class).invoke(box, i);
+				if (pokemon != null) {
+					Object species = pokemon.getClass().getMethod("getSpecies").invoke(pokemon);
+					String speciesName = species.getClass().getMethod("getName").invoke(species).toString();
+					int level = (int) pokemon.getClass().getMethod("getLevel").invoke(pokemon);
+					@SuppressWarnings("unchecked")
+					Set<String> aspectsSet = (Set<String>) pokemon.getClass().getMethod("getAspects").invoke(pokemon);
+					List<String> aspects = new ArrayList<>(aspectsSet);
+					result.add(new PartySlotData(true, speciesName, level, aspects));
+				} else {
+					result.add(new PartySlotData(false, "", 0, List.of()));
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.warn("Failed to read PC box data", e);
+		}
+		return result;
+	}
+
+	public static String getPCBoxName(ServerPlayer player, int boxIndex) {
+		try {
+			Class<?> cobblemonClass = Class.forName("com.cobblemon.mod.common.Cobblemon");
+			Object storage = cobblemonClass.getMethod("getStorage").invoke(cobblemonClass.getField("INSTANCE").get(null));
+			Object pc = storage.getClass().getMethod("getPC", ServerPlayer.class).invoke(storage, player);
+			List<?> boxes = (List<?>) pc.getClass().getMethod("getBoxes").invoke(pc);
+			if (boxIndex < 0 || boxIndex >= boxes.size()) return "Box " + (boxIndex + 1);
+			Object box = boxes.get(boxIndex);
+			Object name = box.getClass().getMethod("getName").invoke(box);
+			return name != null ? name.toString() : "Box " + (boxIndex + 1);
+		} catch (Exception e) {
+			return "Box " + (boxIndex + 1);
+		}
+	}
+
+	public static void spawnAndSeatPokemonFromPC(ServerPlayer player, BlockPos seatPos, int boxIndex, int slotIndex) {
+		try {
+			Class<?> cobblemonClass = Class.forName("com.cobblemon.mod.common.Cobblemon");
+			Object storage = cobblemonClass.getMethod("getStorage").invoke(cobblemonClass.getField("INSTANCE").get(null));
+			Object pc = storage.getClass().getMethod("getPC", ServerPlayer.class).invoke(storage, player);
+			List<?> boxes = (List<?>) pc.getClass().getMethod("getBoxes").invoke(pc);
+			if (boxIndex < 0 || boxIndex >= boxes.size()) return;
+			Object box = boxes.get(boxIndex);
+			Object pokemon = box.getClass().getMethod("get", int.class).invoke(box, slotIndex);
+			if (pokemon == null) return;
+
+			Class<?> pokemonEntityClass = Class.forName("com.cobblemon.mod.common.entity.pokemon.PokemonEntity");
+			Class<?> pokemonClass = Class.forName("com.cobblemon.mod.common.pokemon.Pokemon");
+			Class<?> cobblemonEntities = Class.forName("com.cobblemon.mod.common.CobblemonEntities");
+			Object entitiesInstance = cobblemonEntities.getField("INSTANCE").get(null);
+			Object pokemonEntityType = cobblemonEntities.getField("POKEMON").get(entitiesInstance);
+
+			Constructor<?> constructor = pokemonEntityClass.getConstructor(
+				Level.class, pokemonClass, EntityType.class);
+			Entity pokemonEntity = (Entity) constructor.newInstance(
+				player.level(), pokemon, pokemonEntityType);
+
+			pokemonEntity.setPos(seatPos.getX() + 0.5, seatPos.getY(), seatPos.getZ() + 0.5);
+			pokemonEntity.addTag(SEAT_SPAWNED_TAG);
+			player.level().addFreshEntity(pokemonEntity);
+			SeatBlock.sitDown(player.level(), seatPos, pokemonEntity);
+		} catch (Exception e) {
+			LOGGER.warn("Failed to spawn and seat PC Pokemon", e);
+		}
 	}
 
 	public static void spawnAndSeatPokemon(ServerPlayer player, BlockPos seatPos, int partySlot) {

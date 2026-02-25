@@ -11,22 +11,46 @@ import net.minecraft.server.level.ServerPlayer;
 public class CobblemonSeatPokemonPacket extends SimplePacketBase {
 
 	private final BlockPos seatPos;
-	private final int partySlot;
+	private final boolean isPC;
+	private final int boxIndex;
+	private final int slotIndex;
 
+	/** Party selection constructor. */
 	public CobblemonSeatPokemonPacket(BlockPos seatPos, int partySlot) {
 		this.seatPos = seatPos;
-		this.partySlot = partySlot;
+		this.isPC = false;
+		this.boxIndex = 0;
+		this.slotIndex = partySlot;
+	}
+
+	/** PC selection constructor. */
+	public CobblemonSeatPokemonPacket(BlockPos seatPos, int boxIndex, int slotIndex) {
+		this.seatPos = seatPos;
+		this.isPC = true;
+		this.boxIndex = boxIndex;
+		this.slotIndex = slotIndex;
 	}
 
 	public CobblemonSeatPokemonPacket(RegistryFriendlyByteBuf buffer) {
 		this.seatPos = buffer.readBlockPos();
-		this.partySlot = buffer.readInt();
+		this.isPC = buffer.readBoolean();
+		if (isPC) {
+			this.boxIndex = buffer.readInt();
+			this.slotIndex = buffer.readInt();
+		} else {
+			this.boxIndex = 0;
+			this.slotIndex = buffer.readInt();
+		}
 	}
 
 	@Override
 	public void write(RegistryFriendlyByteBuf buffer) {
 		buffer.writeBlockPos(seatPos);
-		buffer.writeInt(partySlot);
+		buffer.writeBoolean(isPC);
+		if (isPC) {
+			buffer.writeInt(boxIndex);
+		}
+		buffer.writeInt(slotIndex);
 	}
 
 	@Override
@@ -45,13 +69,18 @@ public class CobblemonSeatPokemonPacket extends SimplePacketBase {
 			if (SeatBlock.isSeatOccupied(player.level(), seatPos))
 				return;
 
-			if (partySlot < 0 || partySlot > 5)
-				return;
-
 			if (!Mods.COBBLEMON.isLoaded())
 				return;
 
-			CobblemonCompat.spawnAndSeatPokemon(player, seatPos, partySlot);
+			if (isPC) {
+				if (boxIndex < 0 || slotIndex < 0 || slotIndex > 29)
+					return;
+				CobblemonCompat.spawnAndSeatPokemonFromPC(player, seatPos, boxIndex, slotIndex);
+			} else {
+				if (slotIndex < 0 || slotIndex > 5)
+					return;
+				CobblemonCompat.spawnAndSeatPokemon(player, seatPos, slotIndex);
+			}
 		});
 		return true;
 	}

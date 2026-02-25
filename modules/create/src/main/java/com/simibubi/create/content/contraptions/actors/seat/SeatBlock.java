@@ -157,15 +157,27 @@ public class SeatBlock extends Block implements ProperWaterloggedBlock {
 		
 		if (player.isShiftKeyDown()) {
 			if (Mods.COBBLEMON.isLoaded()) {
-				// If seat has a seat-spawned Pokemon, eject it (discard handled in SeatEntity.removePassenger)
+				// If seat has any Pokemon (seat-spawned or wild), eject it
 				List<SeatEntity> seats = world.getEntitiesOfClass(SeatEntity.class, new AABB(pos));
 				if (!seats.isEmpty()) {
 					SeatEntity seatEntity = seats.get(0);
 					List<Entity> passengers = seatEntity.getPassengers();
-					if (!passengers.isEmpty() && CobblemonCompat.isSeatSpawnedPokemon(passengers.get(0))) {
-						if (!world.isClientSide)
-							seatEntity.ejectPassengers();
-						return InteractionResult.SUCCESS;
+					if (!passengers.isEmpty()) {
+						Entity passenger = passengers.get(0);
+						if (CobblemonCompat.isPokemonEntity(passenger)) {
+							if (!world.isClientSide) {
+								if (CobblemonCompat.isSeatSpawnedPokemon(passenger)) {
+									// Seat-spawned: eject and discard (handled by SeatEntity.removePassenger)
+									seatEntity.ejectPassengers();
+								} else {
+									// Wild/random Pokemon: eject and teleport beside the seat
+									passenger.stopRiding();
+									BlockPos adjacent = CobblemonCompat.findAdjacentPosition(world, pos);
+									passenger.teleportTo(adjacent.getX() + 0.5, adjacent.getY(), adjacent.getZ() + 0.5);
+								}
+							}
+							return InteractionResult.SUCCESS;
+						}
 					}
 				}
 
@@ -175,7 +187,8 @@ public class SeatBlock extends Block implements ProperWaterloggedBlock {
 				if (!isSeatOccupied(world, pos) && player instanceof ServerPlayer serverPlayer
 						&& CobblemonCompat.hasPartyPokemon(serverPlayer)) {
 					AllPackets.getChannel().sendToClient(
-						new CobblemonSeatPartyDataPacket(pos, CobblemonCompat.getPartyData(serverPlayer)),
+						new CobblemonSeatPartyDataPacket(pos, CobblemonCompat.getPartyData(serverPlayer),
+							CobblemonCompat.getPCBoxCount(serverPlayer)),
 						serverPlayer);
 					return InteractionResult.SUCCESS;
 				}
