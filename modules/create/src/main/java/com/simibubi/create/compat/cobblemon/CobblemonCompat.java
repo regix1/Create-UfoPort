@@ -18,6 +18,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -139,10 +140,17 @@ public class CobblemonCompat {
 				return;
 			}
 
+			// Kotlin PokemonEntity has a 3-arg constructor: (Level, Pokemon, EntityType)
 			Class<?> pokemonEntityClass = Class.forName("com.cobblemon.mod.common.entity.pokemon.PokemonEntity");
 			Class<?> pokemonClass = Class.forName("com.cobblemon.mod.common.pokemon.Pokemon");
-			Constructor<?> constructor = pokemonEntityClass.getConstructor(Level.class, pokemonClass);
-			Entity pokemonEntity = (Entity) constructor.newInstance(player.level(), pokemon);
+			Class<?> cobblemonEntities = Class.forName("com.cobblemon.mod.common.CobblemonEntities");
+			Object entitiesInstance = cobblemonEntities.getField("INSTANCE").get(null);
+			Object pokemonEntityType = cobblemonEntities.getMethod("getPOKEMON").invoke(entitiesInstance);
+
+			Constructor<?> constructor = pokemonEntityClass.getConstructor(
+				Level.class, pokemonClass, EntityType.class);
+			Entity pokemonEntity = (Entity) constructor.newInstance(
+				player.level(), pokemon, pokemonEntityType);
 
 			pokemonEntity.setPos(seatPos.getX() + 0.5, seatPos.getY(), seatPos.getZ() + 0.5);
 			player.level().addFreshEntity(pokemonEntity);
