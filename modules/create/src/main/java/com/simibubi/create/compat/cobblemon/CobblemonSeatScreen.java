@@ -102,15 +102,12 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 
 			// Render Pokemon portrait with scissoring
 			if (portraitsAvailable && portraitStates[i] != null) {
-				int portraitCenterX = portraitX + PORTRAIT_SIZE / 2;
-				int portraitCenterY = portraitY + PORTRAIT_SIZE / 2;
-
 				graphics.enableScissor(portraitX, portraitY,
 						portraitX + PORTRAIT_SIZE, portraitY + PORTRAIT_SIZE);
 				CobblemonPortraitRenderer.renderPortrait(
 						graphics, slot.speciesName(), portraitStates[i],
-						portraitCenterX, portraitCenterY,
-						13.0f, baseScales[i], partialTicks);
+						portraitX, portraitY, PORTRAIT_SIZE,
+						baseScales[i], partialTicks);
 				graphics.disableScissor();
 			}
 
