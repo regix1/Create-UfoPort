@@ -59,6 +59,17 @@ public class CobblemonCompat {
 		return BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString();
 	}
 
+	// --- Pokemon Entity Check ---
+
+	public static boolean isPokemonEntity(Entity entity) {
+		try {
+			Class<?> pokemonEntityClass = Class.forName("com.cobblemon.mod.common.entity.pokemon.PokemonEntity");
+			return pokemonEntityClass.isInstance(entity);
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
+	}
+
 	// --- Blaze Burner Pokemon Capture ---
 
 	private static final Set<String> BURNER_CAPTURABLE_SPECIES = Set.of(
