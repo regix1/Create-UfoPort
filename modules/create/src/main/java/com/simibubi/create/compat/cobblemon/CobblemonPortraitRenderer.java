@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 
@@ -14,28 +15,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
-/**
- * Renders Cobblemon Pokemon portraits via reflection so that Cobblemon remains
- * an optional (soft) dependency.
- * <p>
- * Calls {@code com.cobblemon.mod.common.api.gui.GuiUtilsKt.drawPosablePortrait},
- * which is a Kotlin top-level function compiled to a static method. The 7-param
- * {@code @JvmOverloads} overload is used:
- * {@code (ResourceLocation, PoseStack, float scale, float contextScale,
- *         boolean reversed, PosableState state, float partialTicks)}
- * <p>
- * Internally, {@code drawPosablePortrait} translates Y by
- * {@code BattleOverlay.PORTRAIT_DIAMETER + 2} (= 30 pixels) and scales by
- * the requested {@code scale} factor, so the caller must position the
- * PoseStack so that the top-left of the portrait area is at the origin.
- */
 @Environment(EnvType.CLIENT)
 public class CobblemonPortraitRenderer {
 
 	private static final Logger LOGGER = LogUtils.getLogger();
-
-	/** Cobblemon's internal portrait diameter from BattleOverlay.PORTRAIT_DIAMETER. */
-	private static final int COBBLEMON_PORTRAIT_DIAMETER = 28;
 
 	private static boolean initialized = false;
 	private static boolean available = false;
@@ -51,6 +34,12 @@ public class CobblemonPortraitRenderer {
 	private static Method getBaseScaleMethod;
 	private static Method getResourceIdentifierMethod;
 
+	// Sprite rendering
+	private static Object modelRepositoryInstance;
+	private static Method getSpriteMethod;
+	private static Object spriteTypePortrait;
+	private static boolean spriteSystemAvailable = false;
+
 	private static synchronized boolean ensureInitialized() {
 		if (initialized)
 			return available;
@@ -65,10 +54,6 @@ public class CobblemonPortraitRenderer {
 
 			floatingStateConstructor = floatingStateClass.getConstructor();
 
-			// 7-param @JvmOverloads overload (Cobblemon 1.7.x):
-			// drawPosablePortrait(ResourceLocation, PoseStack, float, float, boolean, PosableState, float)
-			// The remaining params (limbSwing, limbSwingAmount, ageInTicks, headYaw, headPitch,
-			// doQuirks, r, g, b, a) all use their defaults.
 			drawPortraitMethod = guiUtilsClass.getMethod("drawPosablePortrait",
 					ResourceLocation.class, PoseStack.class,
 					float.class, float.class, boolean.class,
@@ -76,10 +61,34 @@ public class CobblemonPortraitRenderer {
 
 			setAspectsMethod = posableStateClass.getMethod("setCurrentAspects", Set.class);
 
-			// NOTE: The correct fully-qualified name is api.pokemon, NOT pokemon.PokemonSpecies
 			Class<?> pokemonSpeciesClass = Class.forName("com.cobblemon.mod.common.api.pokemon.PokemonSpecies");
 			speciesRegistryInstance = pokemonSpeciesClass.getField("INSTANCE").get(null);
 			getByNameMethod = speciesRegistryInstance.getClass().getMethod("getByName", String.class);
+
+			// Try to initialize sprite system
+			try {
+				Class<?> spriteTypeClass = Class.forName("com.cobblemon.mod.common.client.render.models.blockbench.repository.SpriteType");
+				Object[] spriteTypes = spriteTypeClass.getEnumConstants();
+				if (spriteTypes != null) {
+					for (Object st : spriteTypes) {
+						if ("PORTRAIT".equals(st.toString())) {
+							spriteTypePortrait = st;
+							break;
+						}
+					}
+				}
+
+				Class<?> repoClass = Class.forName("com.cobblemon.mod.common.client.render.models.blockbench.repository.VaryingModelRepository");
+				modelRepositoryInstance = repoClass.getField("INSTANCE").get(null);
+				getSpriteMethod = repoClass.getMethod("getSprite", ResourceLocation.class, posableStateClass, spriteTypeClass);
+
+				if (spriteTypePortrait != null) {
+					spriteSystemAvailable = true;
+					LOGGER.info("Cobblemon sprite system initialized successfully");
+				}
+			} catch (Exception e) {
+				LOGGER.info("Cobblemon sprite system not available, using 3D portraits: {}", e.getMessage());
+			}
 
 			LOGGER.info("Cobblemon portrait rendering initialized successfully");
 			available = true;
@@ -128,26 +137,13 @@ public class CobblemonPortraitRenderer {
 		}
 	}
 
-	/**
-	 * Renders a Pokemon portrait at the given position.
-	 * <p>
-	 * The portrait is rendered similarly to how Cobblemon's own PartyOverlay does it:
-	 * translate the PoseStack so the portrait area's top-center is at the origin,
-	 * offset upward by 12 pixels, then call drawPosablePortrait which handles the
-	 * internal scaling and model positioning.
-	 *
-	 * @param graphics     the current GuiGraphics context
-	 * @param speciesName  species name (e.g. "Bulbasaur") - will be lowercased for ResourceLocation
-	 * @param state        a FloatingState/PosableState previously created via createState()
-	 * @param portraitX    the left edge of the portrait area (pixels)
-	 * @param portraitY    the top edge of the portrait area (pixels)
-	 * @param portraitSize the width/height of the portrait area (pixels)
-	 * @param contextScale the species base scale (from getBaseScale)
-	 * @param partialTicks current partial tick
-	 */
+	private static String toShowdownId(String speciesName) {
+		return speciesName.toLowerCase().replaceAll("[^a-z0-9]", "");
+	}
+
 	private static ResourceLocation resolveSpeciesIdentifier(String speciesName) {
 		try {
-			String lookupName = speciesName.toLowerCase().replaceAll("[^a-z0-9]", "");
+			String lookupName = toShowdownId(speciesName);
 			Object species = getByNameMethod.invoke(speciesRegistryInstance, lookupName);
 			if (species != null) {
 				if (getResourceIdentifierMethod == null)
@@ -162,6 +158,36 @@ public class CobblemonPortraitRenderer {
 		return null;
 	}
 
+	/**
+	 * Tries to render a 2D sprite texture for the Pokemon.
+	 * Returns true if a sprite was rendered, false if caller should fall back to 3D portrait.
+	 */
+	public static boolean renderSprite(GuiGraphics graphics, String speciesName,
+			Object state, int x, int y, int size) {
+		if (!ensureInitialized() || !spriteSystemAvailable || state == null)
+			return false;
+
+		try {
+			ResourceLocation identifier = resolveSpeciesIdentifier(speciesName);
+			if (identifier == null)
+				return false;
+
+			Object spriteRL = getSpriteMethod.invoke(modelRepositoryInstance, identifier, state, spriteTypePortrait);
+			if (spriteRL instanceof ResourceLocation spriteLoc) {
+				RenderSystem.enableBlend();
+				graphics.blit(spriteLoc, x, y, size, size, 0, 0, 128, 128, 128, 128);
+				RenderSystem.disableBlend();
+				return true;
+			}
+		} catch (Exception e) {
+			// Sprite not available for this species, fall through
+		}
+		return false;
+	}
+
+	/**
+	 * Renders a Pokemon portrait (3D model) at the given position.
+	 */
 	public static void renderPortrait(GuiGraphics graphics, String speciesName,
 			Object state, int portraitX, int portraitY, int portraitSize,
 			float contextScale, float partialTicks) {
@@ -177,10 +203,6 @@ public class CobblemonPortraitRenderer {
 
 			poseStack.pushPose();
 
-			// Match how Cobblemon's PartyOverlay positions the portrait:
-			// Translate to (centerX, topY - vertical_offset, 0)
-			// drawPosablePortrait internally translates Y by PORTRAIT_DIAMETER+2 (=30)
-			// and applies the scale, model portrait offsets, rotation, and lighting.
 			poseStack.translate(
 					portraitX + portraitSize / 2.0 - 1.0,
 					portraitY - 12.0,
@@ -193,6 +215,11 @@ public class CobblemonPortraitRenderer {
 		} catch (Exception e) {
 			LOGGER.warn("Failed to render portrait for {}", speciesName, e);
 		}
+	}
+
+	public static boolean isSpriteAvailable() {
+		ensureInitialized();
+		return spriteSystemAvailable;
 	}
 
 	public static boolean isAvailable() {

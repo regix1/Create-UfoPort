@@ -18,33 +18,48 @@ import net.minecraft.core.BlockPos;
 public class CobblemonSeatScreen extends AbstractSimiScreen {
 
 	private static final int SLOT_WIDTH = 200;
-	private static final int SLOT_HEIGHT = 44;
-	private static final int SLOT_GAP = 4;
-	private static final int PADDING = 10;
-	private static final int TITLE_HEIGHT = 20;
-	private static final int PORTRAIT_SIZE = 40;
-	private static final int TAB_HEIGHT = 20;
-	private static final int TAB_GAP = 4;
-	private static final int NAV_BAR_HEIGHT = 22;
+	private static final int SLOT_HEIGHT = 36;
+	private static final int SLOT_GAP = 2;
+	private static final int PADDING = 8;
+	private static final int TITLE_HEIGHT = 18;
+	private static final int PORTRAIT_SIZE = 32;
+	private static final int TAB_HEIGHT = 18;
+	private static final int TAB_GAP = 2;
+	private static final int NAV_BAR_HEIGHT = 20;
 	private static final int MAX_VISIBLE_SLOTS = 6;
 
-	private static final int BG_COLOR = 0xCC000000;
-	private static final int SLOT_COLOR = 0xFF2A2A3A;
-	private static final int SLOT_HOVER_COLOR = 0xFF3A3A5A;
-	private static final int SLOT_BORDER = 0xFF5391E1;
-	private static final int PORTRAIT_BG = 0xFF1A1A2A;
-	private static final int TEXT_COLOR = 0xFFFFFFFF;
-	private static final int LEVEL_COLOR = 0xFFAAAABB;
-	private static final int TITLE_COLOR = 0xFF5391E1;
-	private static final int TAB_ACTIVE_COLOR = 0xFF3A3A6A;
-	private static final int TAB_INACTIVE_COLOR = 0xFF1A1A2A;
-	private static final int TAB_DISABLED_COLOR = 0xFF111118;
-	private static final int TAB_TEXT_ACTIVE = 0xFFFFFFFF;
-	private static final int TAB_TEXT_INACTIVE = 0xFF888899;
-	private static final int TAB_TEXT_DISABLED = 0xFF444455;
-	private static final int NAV_BUTTON_COLOR = 0xFF2A2A3A;
-	private static final int NAV_BUTTON_HOVER = 0xFF3A3A5A;
-	private static final int LOADING_COLOR = 0xFF888899;
+	// Cobblemon-themed colors
+	private static final int BG_COLOR = 0xE6101820;
+	private static final int BG_BORDER = 0xFF1A3040;
+	private static final int HEADER_COLOR = 0xFF26C6DA;
+	private static final int HEADER_TEXT = 0xFF0A2030;
+
+	private static final int SLOT_COLOR = 0xFF182830;
+	private static final int SLOT_HOVER_COLOR = 0xFF1E3848;
+	private static final int SLOT_BORDER = 0xFF2A4858;
+	private static final int SLOT_HOVER_BORDER = 0xFF26C6DA;
+
+	private static final int PORTRAIT_BG = 0xFF0E1E28;
+
+	private static final int TEXT_COLOR = 0xFFE0E8F0;
+	private static final int LEVEL_COLOR = 0xFF78B8C8;
+	private static final int TITLE_COLOR = 0xFF26C6DA;
+
+	private static final int TAB_ACTIVE_BG = 0xFF26C6DA;
+	private static final int TAB_ACTIVE_TEXT = 0xFF0A1820;
+	private static final int TAB_INACTIVE_BG = 0xFF182830;
+	private static final int TAB_INACTIVE_TEXT = 0xFF5899A8;
+	private static final int TAB_DISABLED_BG = 0xFF101820;
+	private static final int TAB_DISABLED_TEXT = 0xFF304048;
+	private static final int TAB_HOVER_BG = 0xFF1E3848;
+
+	private static final int NAV_BUTTON_BG = 0xFF182830;
+	private static final int NAV_BUTTON_HOVER = 0xFF1E3848;
+	private static final int NAV_BUTTON_TEXT = 0xFF26C6DA;
+	private static final int NAV_NAME_TEXT = 0xFFE0E8F0;
+
+	private static final int LOADING_COLOR = 0xFF5899A8;
+	private static final int SCROLL_INFO_COLOR = 0xFF5899A8;
 
 	private enum Tab { PARTY, PC }
 
@@ -58,6 +73,7 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 	private Object[] partyPortraitStates;
 	private float[] partyBaseScales;
 	private boolean portraitsAvailable;
+	private boolean spritesAvailable;
 
 	// PC state
 	private int currentBoxIndex = 0;
@@ -82,6 +98,7 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 		super.init();
 
 		portraitsAvailable = CobblemonPortraitRenderer.isAvailable();
+		spritesAvailable = CobblemonPortraitRenderer.isSpriteAvailable();
 		initPartyPortraits();
 	}
 
@@ -161,7 +178,6 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 			return;
 		activeTab = tab;
 
-		// Recalculate window size
 		int contentHeight = computeWindowHeight();
 		setWindowSize(SLOT_WIDTH + PADDING * 2, contentHeight);
 		super.init();
@@ -178,18 +194,21 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 	protected void renderWindow(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
 		int contentHeight = computeWindowHeight();
 
+		// Main background
 		graphics.fill(guiLeft, guiTop, guiLeft + windowWidth, guiTop + contentHeight, BG_COLOR);
-		renderBorder(graphics, guiLeft, guiTop, windowWidth, contentHeight, SLOT_BORDER);
+		renderBorder(graphics, guiLeft, guiTop, windowWidth, contentHeight, BG_BORDER);
 
-		graphics.drawCenteredString(font, title, guiLeft + windowWidth / 2, guiTop + PADDING, TITLE_COLOR);
+		// Title bar
+		graphics.fill(guiLeft, guiTop, guiLeft + windowWidth, guiTop + TITLE_HEIGHT + PADDING, HEADER_COLOR);
+		graphics.drawCenteredString(font, title, guiLeft + windowWidth / 2, guiTop + PADDING, HEADER_TEXT);
 
 		int y = guiTop + PADDING + TITLE_HEIGHT;
 
-		// Render tabs
+		// Tabs
 		y = renderTabs(graphics, mouseX, mouseY, y);
 		y += TAB_GAP;
 
-		// Render content
+		// Content
 		if (activeTab == Tab.PARTY) {
 			renderPartyContent(graphics, mouseX, mouseY, y, partialTicks);
 		} else {
@@ -204,25 +223,25 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 
 		// Party tab
 		boolean partyActive = activeTab == Tab.PARTY;
-		boolean partyHovered = mouseX >= partyTabX && mouseX < partyTabX + tabWidth
+		boolean partyHovered = !partyActive && mouseX >= partyTabX && mouseX < partyTabX + tabWidth
 				&& mouseY >= y && mouseY < y + TAB_HEIGHT;
-		int partyBg = partyActive ? TAB_ACTIVE_COLOR : TAB_INACTIVE_COLOR;
-		int partyText = partyActive ? TAB_TEXT_ACTIVE : TAB_TEXT_INACTIVE;
+		int partyBg = partyActive ? TAB_ACTIVE_BG : (partyHovered ? TAB_HOVER_BG : TAB_INACTIVE_BG);
+		int partyText = partyActive ? TAB_ACTIVE_TEXT : TAB_INACTIVE_TEXT;
 		graphics.fill(partyTabX, y, partyTabX + tabWidth, y + TAB_HEIGHT, partyBg);
-		if (partyActive || partyHovered)
-			renderBorder(graphics, partyTabX, y, tabWidth, TAB_HEIGHT, SLOT_BORDER);
+		if (partyActive)
+			renderBorder(graphics, partyTabX, y, tabWidth, TAB_HEIGHT, HEADER_COLOR);
 		graphics.drawCenteredString(font, "Party", partyTabX + tabWidth / 2, y + (TAB_HEIGHT - 8) / 2, partyText);
 
 		// PC tab
 		boolean pcDisabled = pcBoxCount <= 0;
 		boolean pcActive = activeTab == Tab.PC;
-		boolean pcHovered = !pcDisabled && mouseX >= pcTabX && mouseX < pcTabX + tabWidth
+		boolean pcHovered = !pcDisabled && !pcActive && mouseX >= pcTabX && mouseX < pcTabX + tabWidth
 				&& mouseY >= y && mouseY < y + TAB_HEIGHT;
-		int pcBg = pcDisabled ? TAB_DISABLED_COLOR : (pcActive ? TAB_ACTIVE_COLOR : TAB_INACTIVE_COLOR);
-		int pcText = pcDisabled ? TAB_TEXT_DISABLED : (pcActive ? TAB_TEXT_ACTIVE : TAB_TEXT_INACTIVE);
+		int pcBg = pcDisabled ? TAB_DISABLED_BG : (pcActive ? TAB_ACTIVE_BG : (pcHovered ? TAB_HOVER_BG : TAB_INACTIVE_BG));
+		int pcText = pcDisabled ? TAB_DISABLED_TEXT : (pcActive ? TAB_ACTIVE_TEXT : TAB_INACTIVE_TEXT);
 		graphics.fill(pcTabX, y, pcTabX + tabWidth, y + TAB_HEIGHT, pcBg);
-		if ((pcActive || pcHovered) && !pcDisabled)
-			renderBorder(graphics, pcTabX, y, tabWidth, TAB_HEIGHT, SLOT_BORDER);
+		if (pcActive && !pcDisabled)
+			renderBorder(graphics, pcTabX, y, tabWidth, TAB_HEIGHT, HEADER_COLOR);
 		graphics.drawCenteredString(font, "PC", pcTabX + tabWidth / 2, y + (TAB_HEIGHT - 8) / 2, pcText);
 
 		return y + TAB_HEIGHT;
@@ -244,7 +263,6 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 	}
 
 	private void renderPCContent(GuiGraphics graphics, int mouseX, int mouseY, int startY, float partialTicks) {
-		// Navigation bar
 		renderNavBar(graphics, mouseX, mouseY, startY);
 		int slotStartY = startY + NAV_BAR_HEIGHT + SLOT_GAP;
 
@@ -258,7 +276,6 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 		if (currentBoxData == null)
 			return;
 
-		// Collect present pokemon
 		List<Integer> presentIndices = new ArrayList<>();
 		for (int i = 0; i < currentBoxData.size(); i++) {
 			if (currentBoxData.get(i).present())
@@ -272,7 +289,6 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 			return;
 		}
 
-		// Render visible slots with scrolling
 		int maxScroll = Math.max(0, presentIndices.size() - MAX_VISIBLE_SLOTS);
 		pcScrollOffset = Math.min(pcScrollOffset, maxScroll);
 
@@ -290,12 +306,11 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 			visibleCount++;
 		}
 
-		// Scroll indicator
 		if (presentIndices.size() > MAX_VISIBLE_SLOTS) {
 			String scrollInfo = (pcScrollOffset + 1) + "-" + Math.min(pcScrollOffset + MAX_VISIBLE_SLOTS, presentIndices.size())
 				+ " / " + presentIndices.size();
 			graphics.drawCenteredString(font, scrollInfo,
-				guiLeft + windowWidth / 2, slotY + 2, LEVEL_COLOR);
+				guiLeft + windowWidth / 2, slotY + 2, SCROLL_INFO_COLOR);
 		}
 	}
 
@@ -303,29 +318,32 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 		int navX = guiLeft + PADDING;
 		int buttonSize = NAV_BAR_HEIGHT;
 
-		// Left arrow button
+		// Background bar
+		graphics.fill(navX, y, navX + SLOT_WIDTH, y + buttonSize, SLOT_COLOR);
+
+		// Left arrow
 		boolean leftHovered = mouseX >= navX && mouseX < navX + buttonSize
 				&& mouseY >= y && mouseY < y + buttonSize;
 		graphics.fill(navX, y, navX + buttonSize, y + buttonSize,
-			leftHovered ? NAV_BUTTON_HOVER : NAV_BUTTON_COLOR);
+			leftHovered ? NAV_BUTTON_HOVER : NAV_BUTTON_BG);
 		if (leftHovered)
-			renderBorder(graphics, navX, y, buttonSize, buttonSize, SLOT_BORDER);
-		graphics.drawCenteredString(font, "<", navX + buttonSize / 2, y + (buttonSize - 8) / 2, TEXT_COLOR);
+			renderBorder(graphics, navX, y, buttonSize, buttonSize, HEADER_COLOR);
+		graphics.drawCenteredString(font, "<", navX + buttonSize / 2, y + (buttonSize - 8) / 2, NAV_BUTTON_TEXT);
 
-		// Right arrow button
+		// Right arrow
 		int rightX = navX + SLOT_WIDTH - buttonSize;
 		boolean rightHovered = mouseX >= rightX && mouseX < rightX + buttonSize
 				&& mouseY >= y && mouseY < y + buttonSize;
 		graphics.fill(rightX, y, rightX + buttonSize, y + buttonSize,
-			rightHovered ? NAV_BUTTON_HOVER : NAV_BUTTON_COLOR);
+			rightHovered ? NAV_BUTTON_HOVER : NAV_BUTTON_BG);
 		if (rightHovered)
-			renderBorder(graphics, rightX, y, buttonSize, buttonSize, SLOT_BORDER);
-		graphics.drawCenteredString(font, ">", rightX + buttonSize / 2, y + (buttonSize - 8) / 2, TEXT_COLOR);
+			renderBorder(graphics, rightX, y, buttonSize, buttonSize, HEADER_COLOR);
+		graphics.drawCenteredString(font, ">", rightX + buttonSize / 2, y + (buttonSize - 8) / 2, NAV_BUTTON_TEXT);
 
-		// Box name in the center
+		// Box name
 		String displayName = currentBoxName.isEmpty() ? "Box " + (currentBoxIndex + 1) : currentBoxName;
 		graphics.drawCenteredString(font, displayName,
-			guiLeft + windowWidth / 2, y + (buttonSize - 8) / 2, TEXT_COLOR);
+			guiLeft + windowWidth / 2, y + (buttonSize - 8) / 2, NAV_NAME_TEXT);
 	}
 
 	private void renderPokemonSlot(GuiGraphics graphics, int mouseX, int mouseY, int slotY,
@@ -338,23 +356,33 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 		graphics.fill(slotX, slotY, slotX + SLOT_WIDTH, slotY + SLOT_HEIGHT, bgColor);
 
 		if (hovered)
+			renderBorder(graphics, slotX, slotY, SLOT_WIDTH, SLOT_HEIGHT, SLOT_HOVER_BORDER);
+		else
 			renderBorder(graphics, slotX, slotY, SLOT_WIDTH, SLOT_HEIGHT, SLOT_BORDER);
 
-		// Portrait background
+		// Portrait area
 		int portraitX = slotX + 2;
 		int portraitY = slotY + 2;
 		graphics.fill(portraitX, portraitY,
 				portraitX + PORTRAIT_SIZE, portraitY + PORTRAIT_SIZE, PORTRAIT_BG);
 
-		// Render Pokemon portrait with scissoring
+		// Try sprite first, fall back to 3D portrait
 		if (portraitsAvailable && portraitState != null) {
-			graphics.enableScissor(portraitX, portraitY,
-					portraitX + PORTRAIT_SIZE, portraitY + PORTRAIT_SIZE);
-			CobblemonPortraitRenderer.renderPortrait(
-					graphics, slot.speciesName(), portraitState,
-					portraitX, portraitY, PORTRAIT_SIZE,
-					baseScale, partialTicks);
-			graphics.disableScissor();
+			boolean spriteRendered = false;
+			if (spritesAvailable) {
+				spriteRendered = CobblemonPortraitRenderer.renderSprite(
+						graphics, slot.speciesName(), portraitState,
+						portraitX, portraitY, PORTRAIT_SIZE);
+			}
+			if (!spriteRendered) {
+				graphics.enableScissor(portraitX, portraitY,
+						portraitX + PORTRAIT_SIZE, portraitY + PORTRAIT_SIZE);
+				CobblemonPortraitRenderer.renderPortrait(
+						graphics, slot.speciesName(), portraitState,
+						portraitX, portraitY, PORTRAIT_SIZE,
+						baseScale, partialTicks);
+				graphics.disableScissor();
+			}
 		}
 
 		// Pokemon name and level
