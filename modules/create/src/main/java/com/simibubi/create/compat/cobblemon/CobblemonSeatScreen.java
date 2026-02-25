@@ -28,38 +28,37 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 	private static final int NAV_BAR_HEIGHT = 20;
 	private static final int MAX_VISIBLE_SLOTS = 6;
 
-	// Cobblemon-themed colors
-	private static final int BG_COLOR = 0xE6101820;
-	private static final int BG_BORDER = 0xFF1A3040;
-	private static final int HEADER_COLOR = 0xFF26C6DA;
-	private static final int HEADER_TEXT = 0xFF0A2030;
+	// Cobblemon grayscale UI palette
+	private static final int BG_COLOR = 0xE62F2F2F;
+	private static final int BG_BORDER = 0xFF4B4B4B;
+	private static final int HEADER_COLOR = 0xFF676767;
+	private static final int HEADER_TEXT = 0xFFFFFFFF;
 
-	private static final int SLOT_COLOR = 0xFF182830;
-	private static final int SLOT_HOVER_COLOR = 0xFF1E3848;
-	private static final int SLOT_BORDER = 0xFF2A4858;
-	private static final int SLOT_HOVER_BORDER = 0xFF26C6DA;
+	private static final int SLOT_COLOR = 0xFF3D3D3D;
+	private static final int SLOT_HOVER_COLOR = 0xFF4B4B4B;
+	private static final int SLOT_BORDER = 0xFF4B4B4B;
+	private static final int SLOT_HOVER_BORDER = 0xFF8D8D8D;
 
-	private static final int PORTRAIT_BG = 0xFF0E1E28;
+	private static final int PORTRAIT_BG = 0xFF2F2F2F;
 
-	private static final int TEXT_COLOR = 0xFFE0E8F0;
-	private static final int LEVEL_COLOR = 0xFF78B8C8;
-	private static final int TITLE_COLOR = 0xFF26C6DA;
+	private static final int TEXT_COLOR = 0xFFFFFFFF;
+	private static final int LEVEL_COLOR = 0xFFC6C6C6;
 
-	private static final int TAB_ACTIVE_BG = 0xFF26C6DA;
-	private static final int TAB_ACTIVE_TEXT = 0xFF0A1820;
-	private static final int TAB_INACTIVE_BG = 0xFF182830;
-	private static final int TAB_INACTIVE_TEXT = 0xFF5899A8;
-	private static final int TAB_DISABLED_BG = 0xFF101820;
-	private static final int TAB_DISABLED_TEXT = 0xFF304048;
-	private static final int TAB_HOVER_BG = 0xFF1E3848;
+	private static final int TAB_ACTIVE_BG = 0xFF8D8D8D;
+	private static final int TAB_ACTIVE_TEXT = 0xFFFFFFFF;
+	private static final int TAB_INACTIVE_BG = 0xFF3D3D3D;
+	private static final int TAB_INACTIVE_TEXT = 0xFFA0A0A0;
+	private static final int TAB_DISABLED_BG = 0xFF2F2F2F;
+	private static final int TAB_DISABLED_TEXT = 0xFF595959;
+	private static final int TAB_HOVER_BG = 0xFF595959;
 
-	private static final int NAV_BUTTON_BG = 0xFF182830;
-	private static final int NAV_BUTTON_HOVER = 0xFF1E3848;
-	private static final int NAV_BUTTON_TEXT = 0xFF26C6DA;
-	private static final int NAV_NAME_TEXT = 0xFFE0E8F0;
+	private static final int NAV_BUTTON_BG = 0xFF3D3D3D;
+	private static final int NAV_BUTTON_HOVER = 0xFF595959;
+	private static final int NAV_BUTTON_TEXT = 0xFFC6C6C6;
+	private static final int NAV_NAME_TEXT = 0xFFFFFFFF;
 
-	private static final int LOADING_COLOR = 0xFF5899A8;
-	private static final int SCROLL_INFO_COLOR = 0xFF5899A8;
+	private static final int LOADING_COLOR = 0xFFA0A0A0;
+	private static final int SCROLL_INFO_COLOR = 0xFFA0A0A0;
 
 	private enum Tab { PARTY, PC }
 
