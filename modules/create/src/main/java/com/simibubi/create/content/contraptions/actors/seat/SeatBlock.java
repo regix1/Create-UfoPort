@@ -6,12 +6,18 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.google.common.base.Optional;
 import com.simibubi.create.AllBlocks;
+import com.simibubi.create.AllPackets;
 import com.simibubi.create.AllShapes;
 import com.simibubi.create.AllTags.AllEntityTags;
+import com.simibubi.create.compat.Mods;
+import com.simibubi.create.compat.cobblemon.CobblemonCompat;
+import com.simibubi.create.compat.cobblemon.CobblemonSeatPartyDataPacket;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
 import com.simibubi.create.foundation.utility.AdventureUtil;
 import com.simibubi.create.foundation.utility.BlockHelper;
 import com.simibubi.create.infrastructure.config.AllConfigs;
+
+import net.minecraft.server.level.ServerPlayer;
 
 import io.github.fabricators_of_create.porting_lib_ufo.util.TagUtil;
 import net.fabricmc.fabric.api.registry.LandPathNodeTypesRegistry;
@@ -149,9 +155,21 @@ public class SeatBlock extends Block implements ProperWaterloggedBlock {
 	protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player,
 			BlockHitResult p_225533_6_) {
 		
-		if (player.isShiftKeyDown())
+		if (player.isShiftKeyDown()) {
+			if (Mods.COBBLEMON.isLoaded()) {
+				if (world.isClientSide)
+					return InteractionResult.SUCCESS;
+				if (!isSeatOccupied(world, pos) && player instanceof ServerPlayer serverPlayer
+						&& CobblemonCompat.hasPartyPokemon(serverPlayer)) {
+					AllPackets.getChannel().sendToClient(
+						new CobblemonSeatPartyDataPacket(pos, CobblemonCompat.getPartyData(serverPlayer)),
+						serverPlayer);
+					return InteractionResult.SUCCESS;
+				}
+			}
 			return InteractionResult.PASS;
-		
+		}
+
 		List<SeatEntity> seats = world.getEntitiesOfClass(SeatEntity.class, new AABB(pos));
 		if (!seats.isEmpty()) {
 			SeatEntity seatEntity = seats.get(0);

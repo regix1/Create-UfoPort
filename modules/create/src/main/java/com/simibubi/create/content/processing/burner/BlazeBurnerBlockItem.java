@@ -9,6 +9,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllTags.AllEntityTags;
+import com.simibubi.create.compat.Mods;
+import com.simibubi.create.compat.cobblemon.CobblemonCompat;
 import com.simibubi.create.foundation.utility.RegisteredObjects;
 import com.simibubi.create.foundation.utility.VecHelper;
 
@@ -113,7 +115,8 @@ public class BlazeBurnerBlockItem extends BlockItem {
 		InteractionHand hand) {
 		if (hasCapturedBlaze())
 			return InteractionResult.PASS;
-		if (!AllEntityTags.BLAZE_BURNER_CAPTURABLE.matches(entity))
+		if (!AllEntityTags.BLAZE_BURNER_CAPTURABLE.matches(entity)
+				&& !(Mods.COBBLEMON.isLoaded() && CobblemonCompat.isBurnerCapturable(entity)))
 			return InteractionResult.PASS;
 
 		Level world = player.level();
