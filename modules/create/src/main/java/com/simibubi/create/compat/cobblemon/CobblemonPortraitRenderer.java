@@ -49,6 +49,7 @@ public class CobblemonPortraitRenderer {
 	private static Method getByNameMethod;
 	private static Method getStandardFormMethod;
 	private static Method getBaseScaleMethod;
+	private static Method getResourceIdentifierMethod;
 
 	private static synchronized boolean ensureInitialized() {
 		if (initialized)
@@ -143,6 +144,22 @@ public class CobblemonPortraitRenderer {
 	 * @param contextScale the species base scale (from getBaseScale)
 	 * @param partialTicks current partial tick
 	 */
+	private static ResourceLocation resolveSpeciesIdentifier(String speciesName) {
+		try {
+			Object species = getByNameMethod.invoke(speciesRegistryInstance, speciesName.toLowerCase());
+			if (species != null) {
+				if (getResourceIdentifierMethod == null)
+					getResourceIdentifierMethod = species.getClass().getMethod("getResourceIdentifier");
+				Object identifier = getResourceIdentifierMethod.invoke(species);
+				if (identifier instanceof ResourceLocation rl)
+					return rl;
+			}
+		} catch (Exception e) {
+			LOGGER.warn("Failed to resolve species identifier for {}", speciesName, e);
+		}
+		return null;
+	}
+
 	public static void renderPortrait(GuiGraphics graphics, String speciesName,
 			Object state, int portraitX, int portraitY, int portraitSize,
 			float contextScale, float partialTicks) {
@@ -150,8 +167,9 @@ public class CobblemonPortraitRenderer {
 			return;
 
 		try {
-			ResourceLocation identifier = ResourceLocation.fromNamespaceAndPath(
-					"cobblemon", speciesName.toLowerCase());
+			ResourceLocation identifier = resolveSpeciesIdentifier(speciesName);
+			if (identifier == null)
+				return;
 
 			PoseStack poseStack = graphics.pose();
 
