@@ -113,7 +113,7 @@ public class SeatEntity extends Entity implements IEntityAdditionalSpawnData {
 		super.removePassenger(entity);
 		if (entity instanceof TamableAnimal ta)
 			ta.setInSittingPose(false);
-		if (Mods.COBBLEMON.isLoaded() && CobblemonCompat.isPokemonEntity(entity))
+		if (Mods.COBBLEMON.isLoaded() && CobblemonCompat.isSeatSpawnedPokemon(entity))
 			entity.discard();
 	}
 

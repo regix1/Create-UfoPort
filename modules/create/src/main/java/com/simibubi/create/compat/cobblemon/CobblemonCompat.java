@@ -61,6 +61,8 @@ public class CobblemonCompat {
 
 	// --- Pokemon Entity Check ---
 
+	private static final String SEAT_SPAWNED_TAG = "CreateSeatSpawned";
+
 	public static boolean isPokemonEntity(Entity entity) {
 		try {
 			Class<?> pokemonEntityClass = Class.forName("com.cobblemon.mod.common.entity.pokemon.PokemonEntity");
@@ -68,6 +70,10 @@ public class CobblemonCompat {
 		} catch (ClassNotFoundException e) {
 			return false;
 		}
+	}
+
+	public static boolean isSeatSpawnedPokemon(Entity entity) {
+		return isPokemonEntity(entity) && entity.getTags().contains(SEAT_SPAWNED_TAG);
 	}
 
 	// --- Blaze Burner Pokemon Capture ---
@@ -165,6 +171,7 @@ public class CobblemonCompat {
 				player.level(), pokemon, pokemonEntityType);
 
 			pokemonEntity.setPos(seatPos.getX() + 0.5, seatPos.getY(), seatPos.getZ() + 0.5);
+			pokemonEntity.addTag(SEAT_SPAWNED_TAG);
 			player.level().addFreshEntity(pokemonEntity);
 			SeatBlock.sitDown(player.level(), seatPos, pokemonEntity);
 		} catch (Exception e) {
