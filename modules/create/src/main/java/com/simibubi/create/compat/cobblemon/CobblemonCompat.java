@@ -141,11 +141,12 @@ public class CobblemonCompat {
 			}
 
 			// Kotlin PokemonEntity has a 3-arg constructor: (Level, Pokemon, EntityType)
+			// CobblemonEntities.POKEMON is @JvmField so it's a field, not a getter
 			Class<?> pokemonEntityClass = Class.forName("com.cobblemon.mod.common.entity.pokemon.PokemonEntity");
 			Class<?> pokemonClass = Class.forName("com.cobblemon.mod.common.pokemon.Pokemon");
 			Class<?> cobblemonEntities = Class.forName("com.cobblemon.mod.common.CobblemonEntities");
 			Object entitiesInstance = cobblemonEntities.getField("INSTANCE").get(null);
-			Object pokemonEntityType = cobblemonEntities.getMethod("getPOKEMON").invoke(entitiesInstance);
+			Object pokemonEntityType = cobblemonEntities.getField("POKEMON").get(entitiesInstance);
 
 			Constructor<?> constructor = pokemonEntityClass.getConstructor(
 				Level.class, pokemonClass, EntityType.class);
