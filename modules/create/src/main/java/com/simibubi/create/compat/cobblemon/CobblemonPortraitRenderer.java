@@ -110,7 +110,8 @@ public class CobblemonPortraitRenderer {
 		if (!ensureInitialized())
 			return 1.0f;
 		try {
-			Object species = getByNameMethod.invoke(speciesRegistryInstance, speciesName.toLowerCase());
+			String lookupName = speciesName.toLowerCase().replaceAll("[^a-z0-9]", "");
+			Object species = getByNameMethod.invoke(speciesRegistryInstance, lookupName);
 			if (species == null)
 				return 1.0f;
 
@@ -146,7 +147,8 @@ public class CobblemonPortraitRenderer {
 	 */
 	private static ResourceLocation resolveSpeciesIdentifier(String speciesName) {
 		try {
-			Object species = getByNameMethod.invoke(speciesRegistryInstance, speciesName.toLowerCase());
+			String lookupName = speciesName.toLowerCase().replaceAll("[^a-z0-9]", "");
+			Object species = getByNameMethod.invoke(speciesRegistryInstance, lookupName);
 			if (species != null) {
 				if (getResourceIdentifierMethod == null)
 					getResourceIdentifierMethod = species.getClass().getMethod("getResourceIdentifier");
