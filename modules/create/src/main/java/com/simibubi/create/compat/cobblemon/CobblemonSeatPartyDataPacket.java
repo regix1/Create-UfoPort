@@ -31,9 +31,14 @@ public class CobblemonSeatPartyDataPacket extends SimplePacketBase {
 			if (present) {
 				String speciesName = buffer.readUtf(64);
 				int level = buffer.readInt();
-				partyData.add(new PartySlotData(true, speciesName, level));
+				int aspectCount = buffer.readInt();
+				List<String> aspects = new ArrayList<>();
+				for (int j = 0; j < aspectCount; j++) {
+					aspects.add(buffer.readUtf(128));
+				}
+				partyData.add(new PartySlotData(true, speciesName, level, aspects));
 			} else {
-				partyData.add(new PartySlotData(false, "", 0));
+				partyData.add(new PartySlotData(false, "", 0, List.of()));
 			}
 		}
 	}
@@ -42,11 +47,15 @@ public class CobblemonSeatPartyDataPacket extends SimplePacketBase {
 	public void write(RegistryFriendlyByteBuf buffer) {
 		buffer.writeBlockPos(seatPos);
 		for (int i = 0; i < 6; i++) {
-			PartySlotData slot = i < partyData.size() ? partyData.get(i) : new PartySlotData(false, "", 0);
+			PartySlotData slot = i < partyData.size() ? partyData.get(i) : new PartySlotData(false, "", 0, List.of());
 			buffer.writeBoolean(slot.present());
 			if (slot.present()) {
 				buffer.writeUtf(slot.speciesName(), 64);
 				buffer.writeInt(slot.level());
+				buffer.writeInt(slot.aspects().size());
+				for (String aspect : slot.aspects()) {
+					buffer.writeUtf(aspect, 128);
+				}
 			}
 		}
 	}

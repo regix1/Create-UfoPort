@@ -157,6 +157,19 @@ public class SeatBlock extends Block implements ProperWaterloggedBlock {
 		
 		if (player.isShiftKeyDown()) {
 			if (Mods.COBBLEMON.isLoaded()) {
+				// If seat has a seat-spawned Pokemon, eject it (discard handled in SeatEntity.removePassenger)
+				List<SeatEntity> seats = world.getEntitiesOfClass(SeatEntity.class, new AABB(pos));
+				if (!seats.isEmpty()) {
+					SeatEntity seatEntity = seats.get(0);
+					List<Entity> passengers = seatEntity.getPassengers();
+					if (!passengers.isEmpty() && CobblemonCompat.isSeatSpawnedPokemon(passengers.get(0))) {
+						if (!world.isClientSide)
+							seatEntity.ejectPassengers();
+						return InteractionResult.SUCCESS;
+					}
+				}
+
+				// Empty seat - open Pokemon selection GUI
 				if (world.isClientSide)
 					return InteractionResult.SUCCESS;
 				if (!isSeatOccupied(world, pos) && player instanceof ServerPlayer serverPlayer

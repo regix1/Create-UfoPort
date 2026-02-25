@@ -100,7 +100,7 @@ public class CobblemonCompat {
 
 	// --- Seat Pokemon Selection ---
 
-	public record PartySlotData(boolean present, String speciesName, int level) {}
+	public record PartySlotData(boolean present, String speciesName, int level, List<String> aspects) {}
 
 	public static List<PartySlotData> getPartyData(ServerPlayer player) {
 		List<PartySlotData> result = new ArrayList<>();
@@ -115,15 +115,18 @@ public class CobblemonCompat {
 					Object species = pokemon.getClass().getMethod("getSpecies").invoke(pokemon);
 					String speciesName = species.getClass().getMethod("getName").invoke(species).toString();
 					int level = (int) pokemon.getClass().getMethod("getLevel").invoke(pokemon);
-					result.add(new PartySlotData(true, speciesName, level));
+					@SuppressWarnings("unchecked")
+					Set<String> aspectsSet = (Set<String>) pokemon.getClass().getMethod("getAspects").invoke(pokemon);
+					List<String> aspects = new ArrayList<>(aspectsSet);
+					result.add(new PartySlotData(true, speciesName, level, aspects));
 				} else {
-					result.add(new PartySlotData(false, "", 0));
+					result.add(new PartySlotData(false, "", 0, List.of()));
 				}
 			}
 		} catch (Exception e) {
 			LOGGER.warn("Failed to read Cobblemon party data", e);
 			for (int i = result.size(); i < 6; i++)
-				result.add(new PartySlotData(false, "", 0));
+				result.add(new PartySlotData(false, "", 0, List.of()));
 		}
 		return result;
 	}

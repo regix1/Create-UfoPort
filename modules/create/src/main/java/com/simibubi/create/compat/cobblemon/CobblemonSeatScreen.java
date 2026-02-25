@@ -1,11 +1,11 @@
 package com.simibubi.create.compat.cobblemon;
 
+import java.util.HashSet;
 import java.util.List;
 
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.compat.cobblemon.CobblemonCompat.PartySlotData;
 import com.simibubi.create.foundation.gui.AbstractSimiScreen;
-import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Lang;
 
 import net.fabricmc.api.EnvType;
@@ -16,22 +16,28 @@ import net.minecraft.core.BlockPos;
 @Environment(EnvType.CLIENT)
 public class CobblemonSeatScreen extends AbstractSimiScreen {
 
-	private static final int SLOT_WIDTH = 160;
-	private static final int SLOT_HEIGHT = 24;
+	private static final int SLOT_WIDTH = 200;
+	private static final int SLOT_HEIGHT = 44;
 	private static final int SLOT_GAP = 4;
 	private static final int PADDING = 10;
 	private static final int TITLE_HEIGHT = 20;
+	private static final int PORTRAIT_SIZE = 40;
 
 	private static final int BG_COLOR = 0xCC000000;
 	private static final int SLOT_COLOR = 0xFF2A2A3A;
 	private static final int SLOT_HOVER_COLOR = 0xFF3A3A5A;
 	private static final int SLOT_BORDER = 0xFF5391E1;
+	private static final int PORTRAIT_BG = 0xFF1A1A2A;
 	private static final int TEXT_COLOR = 0xFFFFFFFF;
 	private static final int LEVEL_COLOR = 0xFFAAAABB;
 	private static final int TITLE_COLOR = 0xFF5391E1;
 
 	private final BlockPos seatPos;
 	private final List<PartySlotData> partyData;
+
+	private Object[] portraitStates;
+	private float[] baseScales;
+	private boolean portraitsAvailable;
 
 	public CobblemonSeatScreen(BlockPos seatPos, List<PartySlotData> partyData) {
 		super(Lang.translateDirect("pokemon_seat.title"));
@@ -45,6 +51,21 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 		int contentHeight = TITLE_HEIGHT + presentCount * (SLOT_HEIGHT + SLOT_GAP) - SLOT_GAP + PADDING * 2;
 		setWindowSize(SLOT_WIDTH + PADDING * 2, contentHeight);
 		super.init();
+
+		portraitsAvailable = CobblemonPortraitRenderer.isAvailable();
+		portraitStates = new Object[partyData.size()];
+		baseScales = new float[partyData.size()];
+
+		if (portraitsAvailable) {
+			for (int i = 0; i < partyData.size(); i++) {
+				PartySlotData slot = partyData.get(i);
+				if (slot.present()) {
+					portraitStates[i] = CobblemonPortraitRenderer.createState(
+							new HashSet<>(slot.aspects()));
+					baseScales[i] = CobblemonPortraitRenderer.getBaseScale(slot.speciesName());
+				}
+			}
+		}
 	}
 
 	@Override
@@ -73,10 +94,32 @@ public class CobblemonSeatScreen extends AbstractSimiScreen {
 			if (hovered)
 				renderBorder(graphics, slotX, slotY, SLOT_WIDTH, SLOT_HEIGHT, SLOT_BORDER);
 
+			// Portrait background
+			int portraitX = slotX + 2;
+			int portraitY = slotY + 2;
+			graphics.fill(portraitX, portraitY,
+					portraitX + PORTRAIT_SIZE, portraitY + PORTRAIT_SIZE, PORTRAIT_BG);
+
+			// Render Pokemon portrait with scissoring
+			if (portraitsAvailable && portraitStates[i] != null) {
+				int portraitCenterX = portraitX + PORTRAIT_SIZE / 2;
+				int portraitCenterY = portraitY + PORTRAIT_SIZE / 2;
+
+				graphics.enableScissor(portraitX, portraitY,
+						portraitX + PORTRAIT_SIZE, portraitY + PORTRAIT_SIZE);
+				CobblemonPortraitRenderer.renderPortrait(
+						graphics, slot.speciesName(), portraitStates[i],
+						portraitCenterX, portraitCenterY,
+						13.0f, baseScales[i], partialTicks);
+				graphics.disableScissor();
+			}
+
+			// Pokemon name and level
+			int textX = slotX + PORTRAIT_SIZE + 10;
 			String name = capitalize(slot.speciesName());
 			String level = "Lv." + slot.level();
 
-			graphics.drawString(font, name, slotX + 8, slotY + (SLOT_HEIGHT - 8) / 2, TEXT_COLOR);
+			graphics.drawString(font, name, textX, slotY + (SLOT_HEIGHT - 8) / 2, TEXT_COLOR);
 			int levelWidth = font.width(level);
 			graphics.drawString(font, level, slotX + SLOT_WIDTH - 8 - levelWidth,
 					slotY + (SLOT_HEIGHT - 8) / 2, LEVEL_COLOR);
