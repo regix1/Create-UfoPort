@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -11,6 +12,7 @@ import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllTags.AllEntityTags;
 import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.cobblemon.CobblemonCompat;
+import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.RegisteredObjects;
 import com.simibubi.create.foundation.utility.VecHelper;
 
@@ -115,10 +117,35 @@ public class BlazeBurnerBlockItem extends BlockItem {
 		InteractionHand hand) {
 		if (hasCapturedBlaze())
 			return InteractionResult.PASS;
-		if (!AllEntityTags.BLAZE_BURNER_CAPTURABLE.matches(entity)
-				&& !(Mods.COBBLEMON.isLoaded() && CobblemonCompat.isBurnerCapturable(entity)))
+
+		boolean isVanillaCapturable = AllEntityTags.BLAZE_BURNER_CAPTURABLE.matches(entity);
+		boolean isCobblemonCapturable = Mods.COBBLEMON.isLoaded()
+			&& CobblemonCompat.isBurnerCapturable(entity);
+
+		if (!isVanillaCapturable && !isCobblemonCapturable)
 			return InteractionResult.PASS;
 
+		// Cobblemon ownership check
+		if (isCobblemonCapturable && CobblemonCompat.isOwnedPokemon(entity)) {
+			UUID ownerUUID = CobblemonCompat.getPokemonOwnerUUID(entity);
+			if (ownerUUID != null && !ownerUUID.equals(player.getUUID())) {
+				// Not your Pokemon — reject
+				if (!player.level().isClientSide)
+					player.displayClientMessage(
+						Lang.translateDirect("blaze_burner.magmar_not_yours"), true);
+				return InteractionResult.FAIL;
+			}
+			// Owner's Pokemon — capture WITHOUT consuming
+			Level world = player.level();
+			spawnCaptureEffects(world, entity.position());
+			if (world.isClientSide)
+				return InteractionResult.FAIL;
+			giveBurnerItemTo(player, heldItem, hand);
+			// DO NOT call entity.discard() — Magmar stays alive
+			return InteractionResult.FAIL;
+		}
+
+		// Wild Magmar or vanilla Blaze — consume as before
 		Level world = player.level();
 		spawnCaptureEffects(world, entity.position());
 		if (world.isClientSide)

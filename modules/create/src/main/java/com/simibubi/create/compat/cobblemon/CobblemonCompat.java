@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 
@@ -108,6 +109,34 @@ public class CobblemonCompat {
 			return BURNER_CAPTURABLE_SPECIES.contains(speciesName.toString().toLowerCase());
 		} catch (Exception e) {
 			return false;
+		}
+	}
+
+	public static boolean isOwnedPokemon(Entity entity) {
+		try {
+			Class<?> pokemonEntityClass = Class.forName("com.cobblemon.mod.common.entity.pokemon.PokemonEntity");
+			if (!pokemonEntityClass.isInstance(entity))
+				return false;
+
+			Object pokemon = pokemonEntityClass.getMethod("getPokemon").invoke(entity);
+			Object ownerUUID = pokemon.getClass().getMethod("getOwnerUUID").invoke(pokemon);
+			return ownerUUID != null;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public static UUID getPokemonOwnerUUID(Entity entity) {
+		try {
+			Class<?> pokemonEntityClass = Class.forName("com.cobblemon.mod.common.entity.pokemon.PokemonEntity");
+			if (!pokemonEntityClass.isInstance(entity))
+				return null;
+
+			Object pokemon = pokemonEntityClass.getMethod("getPokemon").invoke(entity);
+			Object ownerUUID = pokemon.getClass().getMethod("getOwnerUUID").invoke(pokemon);
+			return (UUID) ownerUUID;
+		} catch (Exception e) {
+			return null;
 		}
 	}
 

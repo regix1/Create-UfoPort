@@ -886,6 +886,7 @@
   "create.action.scroll": "Scroll",
   "create.backtank.depleted": "Backtank pressure depleted",
   "create.backtank.low": "Backtank pressure low",
+  "create.blaze_burner.magmar_not_yours": "This Magmar belongs to another trainer!",
   "create.block.cart_assembler.invalid": "Place your Cart Assembler on a rail block",
   "create.block.deployer.damage_source_name": "a rogue Deployer",
   "create.bogey.style.invalid": "Unnamed style",
