@@ -258,6 +258,10 @@ public class CobblemonCompat {
 			Object pokemon = box.getClass().getMethod("get", int.class).invoke(box, slotIndex);
 			if (pokemon == null) return;
 
+			// Check if this Pokemon is already sent out in the world
+			Object existingEntity = pokemon.getClass().getMethod("getEntity").invoke(pokemon);
+			if (existingEntity != null) return;
+
 			Class<?> pokemonEntityClass = Class.forName("com.cobblemon.mod.common.entity.pokemon.PokemonEntity");
 			Class<?> pokemonClass = Class.forName("com.cobblemon.mod.common.pokemon.Pokemon");
 			Class<?> cobblemonEntities = Class.forName("com.cobblemon.mod.common.CobblemonEntities");
@@ -289,6 +293,10 @@ public class CobblemonCompat {
 				LOGGER.warn("No Pokemon in party slot {}", partySlot);
 				return;
 			}
+
+			// Check if this Pokemon is already sent out in the world
+			Object existingEntity = pokemon.getClass().getMethod("getEntity").invoke(pokemon);
+			if (existingEntity != null) return;
 
 			// Kotlin PokemonEntity has a 3-arg constructor: (Level, Pokemon, EntityType)
 			// CobblemonEntities.POKEMON is @JvmField so it's a field, not a getter
